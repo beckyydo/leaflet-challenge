@@ -1,7 +1,7 @@
 // Creating map object
 var myMap = L.map("mapid", {
-    center: [34.0522, -118.2437],
-    zoom: 13
+    center: [36.1699, -115.1398],
+    zoom: 4
 });
 
 // Adding tile layer
@@ -14,9 +14,67 @@ L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_toke
     accessToken: API_KEY
 }).addTo(myMap);
 
-url = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson"
+url = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson?$limit=100"
 
 d3.json(url, function(data) {
-    console.log(data)
-	L.geoJson(data).addTo(myMap)
+
+    data.features.forEach(function(response){
+        var coordinates = [response.geometry.coordinates[1], response.geometry.coordinates[0]]
+        L.circle(coordinates, {
+            color: 'black',
+            fillColor: depthColor(response.geometry.coordinates[2]),
+            fillOpacity: 0.75,
+            radius: magRadius(response.properties.mag),
+            weight: 1
+        }).bindPopup(`Place: ${response.properties.place} <br>
+                    Depth: ${response.geometry.coordinates[2]} <br>
+                    Magnitude: ${response.properties.mag} <br>
+                    (Lat, Lon): (${coordinates[0]}, ${coordinates[1]})`).addTo(myMap);
+    })
+
+    // Position Legend
+    var legend = L.control({ position: "bottomright" });
+
+    legend.onAdd = function() {
+        var div = L.DomUtil.create("div", "info legend");
+        div.innerHTML += "<h4>Depth Legend</h4>";
+        div.innerHTML += '<i style="background: #A3F600"></i><span>-10 to 10</span><br>';
+        div.innerHTML += '<i style="background: #DCF400"></i><span>10 to 30</span><br>';
+        div.innerHTML += '<i style="background: #F7DB11"></i><span>30 to 50</span><br>';
+        div.innerHTML += '<i style="background: #FDB72A"></i><span>50 to 70</span><br>';
+        div.innerHTML += '<i style="background: #FCA35D"></i><span>70 to 90</span><br>';
+        div.innerHTML += '<i style="background: #FF5F65"></i><span>90 +</span><br>';        
+        
+        return div;
+      };
+      
+      legend.addTo(myMap);
 });
+
+// Define function to determine color according to depth
+function depthColor(depth){
+    if (depth <=10){
+        return '#A3F600';
+    }
+    else if (depth > 10 && depth <= 30){
+        return '#DCF400';
+    }
+    else if (depth > 30 && depth <= 50){
+        return '#F7DB11';
+    }
+    else if (depth > 50 && depth <= 70){
+        return '#FDB72A';
+    }
+    else if (depth > 70 && depth <= 90){
+        return '#FCA35D';
+    }
+    else{
+        return '#FF5F65';
+    }
+
+}
+
+// Define function to determin radius according to magnitude
+function magRadius(mag){
+    return mag*30000
+}
