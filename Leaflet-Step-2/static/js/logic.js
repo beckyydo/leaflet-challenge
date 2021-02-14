@@ -100,7 +100,9 @@ legend.onAdd = function() {
 legend.addTo(myMap);
 
 // Add layers control
-L.control.layers(baseMaps, overlayMaps,{collapsed:false}).addTo(myMap);
+L.control.layers(baseMaps, overlayMaps,{
+    collapsed:false
+}).addTo(myMap);
 
 // Define function to determine color according to depth
 function depthColor(depth){
