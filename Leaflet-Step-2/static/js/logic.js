@@ -39,17 +39,19 @@ var tectonicMarkers = []
 // Create tectonic line markers 
 d3.json(tectonic_url, function(response){
 
+
     response.features.forEach(function(feature){
+        
 
         tectonicMarkers.push(L.polygon(feature.geometry.coordinates[0], {
             color: "yellow"
         }));
     });
 });
+console.log(tectonicMarkers[0])
 
 // Create earthquake circle markers
 d3.json(url, function(data) {
-
     data.features.forEach(function(response){
 
         var coordinates = [response.geometry.coordinates[1], response.geometry.coordinates[0]]
@@ -67,6 +69,7 @@ d3.json(url, function(data) {
                                 });
 });
 
+console.log(earthquakeMarkers)
 // Create base layers
 var earthquakes = L.layerGroup(earthquakeMarkers);
 var tectonic = L.layerGroup(tectonicMarkers);
